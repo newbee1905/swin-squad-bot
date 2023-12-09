@@ -10,6 +10,8 @@ use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
 use serenity::prelude::*;
 
+use cs_handbook::models::{Handbook};
+
 struct Handler;
 
 #[async_trait]

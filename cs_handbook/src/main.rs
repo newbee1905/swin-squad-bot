@@ -10,8 +10,7 @@ mod db;
 mod scraper;
 
 use crate::scraper::parse_handbook;
-use crate::db::{create_tables_if_not_exists, update_handbook};
-use sqlx::{migrate::MigrateDatabase, Sqlite, SqlitePool};
+use crate::db::{create_tables_if_not_exists, update_handbook, get_db_pool};
 use std::error::Error;
 use lazy_static::lazy_static;
 
@@ -30,16 +29,10 @@ lazy_static! {
 async fn main() -> Result<(), Box<dyn Error>> {
 	let handbook = parse_handbook().await?;
 
-	if !Sqlite::database_exists(*DB_URL).await? {
-		match Sqlite::create_database(*DB_URL).await {
-			Ok(_) => println!("Create db success"),
-			Err(error) => panic!("error: {}", error),
-		}
-	}
-
-	let pool = SqlitePool::connect(*DB_URL).await?;
+	let pool = get_db_pool(*DB_URL).await?;
 	create_tables_if_not_exists(&pool).await?;
 	update_handbook(&pool, &handbook).await?;
+
 	pool.close().await;
 
 	Ok(())

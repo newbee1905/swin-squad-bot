@@ -1,6 +1,17 @@
+[unstable]
+profile-rustflags = true
+
 [workspace]
 members = [
 	"bot",
 	"cs_handbook",
 ]
 resolver = "2"
+
+[profile.release]
+strip = "debuginfo"
+lto = true
+opt-level = 3
+codegen-units = 1
+# "http://likebike.com/posts/How_To_Write_Fast_Rust_Code.html#emit-asm'
+# rustflags = ["-C", "--emit=asm"]

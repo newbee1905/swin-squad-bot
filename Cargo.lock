@@ -135,6 +135,7 @@ dependencies = [
 name = "bot"
 version = "0.1.0"
 dependencies = [
+ "cs_handbook",
  "dotenv",
  "dotenv_codegen",
  "serenity",

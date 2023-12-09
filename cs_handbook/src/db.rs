@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
-use crate::models::Handbook;
+use crate::models::{Handbook, Unit};
 use lazy_static::lazy_static;
-use sqlx::SqlitePool;
+use sqlx::{migrate::MigrateDatabase, Sqlite, SqlitePool, Row};
 
 lazy_static! {
 	static ref SQL_MAJOR_TABLE: &'static str =
@@ -28,6 +28,25 @@ lazy_static! {
 
 	static ref SQL_DELETE_UNIT: &'static str =
 		"DELETE FROM units WHERE major_title = ? AND type = ? AND name NOT IN (";
+
+	static ref SQL_GET_UNIT_BY_MAJOR: &'static str =
+		"SELECT name FROM units WHERE major_title = ?";
+
+	static ref SQL_GET_UNIT_BY_CODENAME: &'static str =
+		"SELECT name FROM units WHERE name = ?";
+}
+
+pub async fn get_db_pool(db_url: &str) -> Result<SqlitePool, sqlx::Error> {
+	if !Sqlite::database_exists(db_url).await? {
+		match Sqlite::create_database(db_url).await {
+			Ok(_) => println!("Create db success"),
+			Err(error) => panic!("error: {}", error),
+		}
+	}
+
+	let pool = SqlitePool::connect(db_url).await?;
+
+	Ok(pool)
 }
 
 pub async fn create_tables_if_not_exists(pool: &SqlitePool) -> Result<(), sqlx::Error> {
@@ -57,7 +76,7 @@ pub async fn update_handbook(pool: &SqlitePool, handbook: &Handbook) -> Result<(
 	Ok(())
 }
 
-pub async fn update_units(
+async fn update_units(
 	transaction: &mut sqlx::Transaction<'_, sqlx::Sqlite>,
 	major_title: Option<&str>,
 	unit_type: &str,
@@ -87,4 +106,24 @@ pub async fn update_units(
 	}
 
 	Ok(())
+}
+
+pub async fn get_units_by_major(pool: &SqlitePool, major_title: &str) -> Result<Vec<Unit>, sqlx::Error> {
+	Ok(
+		sqlx::query(*SQL_GET_UNIT_BY_MAJOR)
+			.bind(major_title)
+			.map(|row| row.get::<Unit, _>("name"))
+			.fetch_all(pool)
+			.await?
+	)
+}
+
+pub async fn get_units_by_codename(pool: &SqlitePool, codename: &str) -> Result<Unit, sqlx::Error> {
+	Ok(
+		sqlx::query(*SQL_GET_UNIT_BY_CODENAME)
+			.bind(codename)
+			.map(|row| row.get::<Unit, _>("name"))
+			.fetch_one(pool)
+			.await?
+	)
 }
