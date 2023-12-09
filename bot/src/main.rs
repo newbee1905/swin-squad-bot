@@ -2,10 +2,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
-extern crate dotenv;
-
-use dotenv::dotenv;
-use std::env;
+#[macro_use]
+extern crate dotenv_codegen;
 
 use serenity::async_trait;
 use serenity::model::channel::Message;
@@ -44,9 +42,7 @@ impl EventHandler for Handler {
 
 #[tokio::main]
 async fn main() {
-	dotenv().ok();
-	// Configure the client with your Discord bot token in the environment.
-	let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+	let token = dotenv!("DISCORD_TOKEN");
 	// Set gateway intents, which decides what events the bot will be notified about
 	let intents = GatewayIntents::GUILD_MESSAGES
 		| GatewayIntents::DIRECT_MESSAGES
