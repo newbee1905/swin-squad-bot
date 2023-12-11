@@ -29,6 +29,8 @@ lazy_static! {
 async fn main() -> Result<(), Box<dyn Error>> {
 	let handbook = parse_handbook().await?;
 
+	println!("{:#?}", handbook);
+
 	let pool = get_db_pool(*DB_URL).await?;
 	create_tables_if_not_exists(&pool).await?;
 	update_handbook(&pool, &handbook).await?;

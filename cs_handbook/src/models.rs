@@ -4,11 +4,13 @@
 
 pub type Unit = String;
 
+#[derive(Debug)]
 pub struct Major {
 	pub title: String,
 	pub units: Vec<Unit>,  
 }
 
+#[derive(Debug)]
 pub struct Handbook {
 	pub majors: Vec<Major>,
 	pub cores: Vec<Unit>,

@@ -13,18 +13,20 @@ lazy_static! {
 		)";
 	static ref SQL_UNIT_TABLE: &'static str = 
 		"CREATE TABLE IF NOT EXISTS units (
-			name TEXT PRIMARY KEY NOT NULL,
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL,
 			type TEXT NOT NULL, -- 'major', 'core', or 'elective'
 			major_title TEXT, -- Can be NULL
 			FOREIGN KEY (major_title)
 			REFERENCES majors(title)
+			UNIQUE(name, major_title)
 		)";
 	static ref SQL_INSERT_MAJOR: &'static str =
 		"INSERT INTO majors (title) VALUES (?) ON CONFLICT(title) DO NOTHING";
 
 	static ref SQL_INSERT_UPDATE_UNIT: &'static str =
 		"INSERT INTO units (name, type, major_title) VALUES (?, ?, ?) \
-		 ON CONFLICT(name) DO UPDATE SET major_title = excluded.major_title, type = excluded.type";
+		ON CONFLICT(name, major_title) DO NOTHING";
 
 	static ref SQL_DELETE_UNIT: &'static str =
 		"DELETE FROM units WHERE major_title = ? AND type = ? AND name NOT IN (";
