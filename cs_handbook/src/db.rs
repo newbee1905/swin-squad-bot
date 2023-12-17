@@ -36,6 +36,18 @@ lazy_static! {
 
 	static ref SQL_GET_UNIT_BY_CODENAME: &'static str =
 		"SELECT name FROM units WHERE name = ?";
+
+	static ref SQL_GET_UNIT: &'static str =
+		"SELECT name FROM units WHERE";
+
+	static ref SQL_GET_UNIT__OPTION_MAJOR: &'static str =
+		" major_title = ? AND";
+
+	static ref SQL_GET_UNIT__OPTION_TYPE: &'static str =
+		" type = ? AND";
+
+	static ref SQL_GET_UNIT__OPTION_CODENAME: &'static str =
+		" name LIKE ?";
 }
 
 pub async fn get_db_pool(db_url: &str) -> Result<SqlitePool, sqlx::Error> {
@@ -128,4 +140,59 @@ pub async fn get_units_by_codename(pool: &SqlitePool, codename: &str) -> Result<
 			.fetch_one(pool)
 			.await?
 	)
+}
+
+pub async fn get_units(
+	pool: &SqlitePool,
+	major: Option<&str>,
+	unit_type: Option<&str>,
+	unit_name: Option<&str>,
+) -> Result<Vec<Unit>, sqlx::Error> {
+	let mut query_builder = String::from("SELECT * FROM units WHERE");
+
+	if let Some(m) = major {
+		query_builder.push_str(" major = ? AND");
+	}
+
+	if let Some(t) = unit_type {
+		query_builder.push_str(" type = ? AND");
+	}
+
+	if let Some(n) = unit_name {
+		query_builder.push_str(" name LIKE ?");
+	}
+
+	if query_builder.ends_with(" AND") {
+		query_builder.pop();
+		query_builder.pop();
+		query_builder.pop();
+	}
+
+	if query_builder.ends_with(" WHERE") {
+		query_builder.pop();
+		query_builder.pop();
+		query_builder.pop();
+		query_builder.pop();
+	}
+
+	let mut query = sqlx::query(&query_builder);
+
+	if let Some(m) = major {
+		query = query.bind(m);
+	}
+
+	if let Some(t) = unit_type {
+		query = query.bind(t);
+	}
+
+	if let Some(n) = unit_name {
+		query = query.bind(format!("%{}%", n));
+	}
+
+	let result = query
+		.map(|row| row.get::<Unit, _>("name"))
+		.fetch_all(pool)
+		.await?;
+
+	Ok(result)
 }
