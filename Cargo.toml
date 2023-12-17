@@ -1,10 +1,8 @@
-[unstable]
-profile-rustflags = true
-
 [workspace]
 members = [
 	"bot",
 	"cs_handbook",
+	"server",
 ]
 resolver = "2"
 

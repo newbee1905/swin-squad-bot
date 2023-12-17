@@ -1,0 +1,25 @@
+[package]
+name = "server"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+hyper = { version = "1", features = ["full"] }
+tokio = { version = "1", features = ["full"] }
+http-body-util = "0.1"
+hyper-util = { version = "0.1", features = ["tokio"] }
+pretty_env_logger = "0.5"
+bytes = "1"
+cs_handbook = { path = "../cs_handbook" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+lazy_static = "1.4.0"
+dotenv = "0.15"
+dotenv_codegen = "0.15"
+form_urlencoded = "1.2.1"
+sqlx = { version = "0.5", features = ["runtime-tokio-native-tls", "sqlite"] }
+log = "0.4.20"
+urlencoding = "2.1.3"
+
